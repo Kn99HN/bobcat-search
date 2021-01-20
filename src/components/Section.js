@@ -47,6 +47,10 @@ function Section({
     setExpandedList(newLs);
   };
 
+  const handleOnClick = (course) => {
+    wishlistCourse({ year, semester, course });
+  };
+
   return (
     <SectionContainer
       waitlisted={
@@ -93,7 +97,7 @@ function Section({
                   : "rotate(0deg)",
                 transition: "0.5s",
               }}
-            ></ExpandMoreOutlined>
+            />
             <span
               style={{
                 color: grey[700],
@@ -103,15 +107,7 @@ function Section({
             </span>
           </ExpandButton>
         )}
-        <CalendarButton
-          onClick={() =>
-            wishlistCourse({
-              year,
-              semester,
-              course: section,
-            })
-          }
-        >
+        <WishlistButton>
           <CalendarTodayTwoTone
             style={{
               color: styleStatus(section.status),
@@ -120,16 +116,8 @@ function Section({
           <span style={{ color: styleStatus(section.status) }}>
             {changeStatus(section)}
           </span>
-        </CalendarButton>
-        <CalendarButton
-          onClick={() =>
-            wishlistCourse({
-              year,
-              semester,
-              course: section,
-            })
-          }
-        >
+        </WishlistButton>
+        <WishlistButton onClick={() => handleOnClick(section)}>
           <AddBoxTwoTone
             style={{
               color: grey[700],
@@ -142,7 +130,7 @@ function Section({
           >
             Add to Wishlist
           </span>
-        </CalendarButton>
+        </WishlistButton>
       </UtilBar>
       <Collapse
         in={expandedList[section.registrationNumber] ?? false}
@@ -251,7 +239,7 @@ const UtilBar = styled.div`
   align-items: center;
 `;
 
-const CalendarButton = styled.div`
+const WishlistButton = styled.div`
   font-size: 1.1rem;
   height: 100%;
   width: 12rem;
