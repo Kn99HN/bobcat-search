@@ -131,6 +131,22 @@ function Section({
             Add to Wishlist
           </span>
         </WishlistButton>
+        {section.status !== "Open" && (
+          <WishlistButton onClick={() => handleOnClick(section)}>
+            <AddBoxTwoTone
+              style={{
+                color: grey[700],
+              }}
+            />
+            <span
+              style={{
+                color: grey[700],
+              }}
+            >
+              Track status
+            </span>
+          </WishlistButton>
+        )}
       </UtilBar>
       <Collapse
         in={expandedList[section.registrationNumber] ?? false}

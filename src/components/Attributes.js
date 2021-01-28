@@ -5,7 +5,8 @@ import { findInstructor } from "../utils";
 
 import Drawer from "@material-ui/core/Drawer";
 import grey from "@material-ui/core/colors/grey";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+
+import Table from "./Table";
 
 export default function Attributes({
   instructors,
@@ -23,6 +24,7 @@ export default function Attributes({
     page: 1,
     ratings: [],
     isMore: true,
+    overallRating: 0,
     totatRatings: 0,
   });
   const [drawer, setDrawer] = useState(false);
@@ -54,6 +56,7 @@ export default function Attributes({
         page: 1,
         isMore: jsonRatings.remaining === 0 ? false : true,
         ratings: [...currentInstructor.ratings, ...jsonRatings.ratings],
+        overallRating: 0, //change this
         totalRatings: jsonRatings.remaining + jsonRatings.ratings.length,
       });
       setDrawer(true);
@@ -90,7 +93,6 @@ export default function Attributes({
         findInstructor(instructor)
       );
       setInstructorsWithRMP(modifiedInstructors);
-      console.log(modifiedInstructors);
     })();
   }, [instructors]);
 
@@ -98,45 +100,14 @@ export default function Attributes({
     <div className="attributes">
       <React.Fragment>
         <Drawer anchor={"right"} open={drawer} onClose={onClose}>
-          {
-            <MetaContainer>
-              <div>{currentInstructor.name}</div>
-              <div>{`${currentInstructor.totalRatings} reviews`}</div>
-            </MetaContainer>
-          }
-          <RatingGrid>
-            <div style={{ width: "40vw" }}>
-              <RatingContainer>
-                <InfoContainer>Info</InfoContainer>
-                <Comment style={{ textAlign: "center" }}>Comment</Comment>
-              </RatingContainer>
-            </div>
-            {currentInstructor.ratings.length > 0 &&
-              currentInstructor.ratings.map((rating) => {
-                return (
-                  <div key={rating.id} style={{ width: "40vw" }}>
-                    <RatingContainer>
-                      <InfoContainer>
-                        <Rating>{rating.rClass}</Rating>
-                        <Rating>{`Overall: ${rating.rOverall}`}</Rating>
-                        <Rating>{`Helpful: ${rating.rHelpful}`}</Rating>
-                      </InfoContainer>
-                      <Comment>{rating.rComments}</Comment>
-                    </RatingContainer>
-                  </div>
-                );
-              })}
-          </RatingGrid>
-          {currentInstructor.isMore && (
-            <ExpandButton onClick={onLoadMore}>
-              <ExpandMoreIcon
-                style={{
-                  color: grey[700],
-                }}
-              />
-              <span style={{ color: grey[700] }}>More Reviews</span>
-            </ExpandButton>
-          )}
+          <Table
+            name={currentInstructor.name}
+            totalRatings={currentInstructor.totalRatings}
+            overallRating={currentInstructor.overallRating}
+            ratings={currentInstructor.ratings}
+            isMore={currentInstructor.isMore}
+            onLoadMore={onLoadMore}
+          />
         </Drawer>
       </React.Fragment>
       <AttributeContainer>
@@ -204,86 +175,11 @@ const AttributeContainer = styled.div`
   }
 `;
 
-const MetaContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: calc(0.8vmin + 0.8rem);
-  font-size: 1.5rem;
-  color: var(--grey200);
-  font-weight: bold;
-  background: linear-gradient(
-    167deg,
-    var(--purpleMain) 21%,
-    #712991 60%,
-    rgba(135, 37, 144, 1) 82%
-  );
-`;
-
-const RatingGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-`;
-
-const RatingContainer = styled.div`
-  padding: 0.4rem;
-  font-size: 1rem;
-  color: var(--grey900);
-  font-weight: bold;
-  display: flex;
-  background-color: var(--grey400);
-  border-bottom: 1px solid;
-  border-top: 1px solid;
-  width: 100%;
-`;
-
-const InfoContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 30%;
-  text-align: left;
-`;
-
-const Rating = styled.div`
-  padding: 0 0.4rem;
-  margin: 0 0.2rem;
-`;
-
-const Comment = styled.div`
-  padding: 0.5rem;
-  margin: 0.2rem;
-  border-left: 1px solid;
-  width: 70%;
-`;
-
 const InstructorName = styled.div`
   cursor: ${(props) => (props.clickable ? "pointer" : "")};
   transition: 0.1s;
 
   :hover {
     color: ${(props) => (props.clickable ? grey[600] : "")};
-  }
-`;
-
-const ExpandButton = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  padding: 0.8rem 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background-color: ${grey[200]};
-  transition: 0.1s;
-
-  :hover {
-    background-color: ${grey[300]};
-  }
-
-  & > svg {
-    margin-right: 0.65rem;
   }
 `;
