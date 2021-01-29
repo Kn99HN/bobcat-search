@@ -25,7 +25,7 @@ export default function Attributes({
     ratings: [],
     isMore: true,
     overallRating: 0,
-    totatRatings: 0,
+    totalRatings: 0,
   });
   const [drawer, setDrawer] = useState(false);
 

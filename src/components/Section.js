@@ -7,8 +7,15 @@ import {
   AddBoxTwoTone,
   ExpandMoreOutlined,
 } from "@material-ui/icons";
-import { grey } from "@material-ui/core/colors";
+import { grey, green } from "@material-ui/core/colors";
 import { Collapse } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 import Attributes from "./Attributes";
 import DateSection from "./DateSection";
@@ -35,6 +42,91 @@ function Section({
   lastSection,
 }) {
   const [expandedList, setExpandedList] = useState({});
+  const [form, setForm] = useState(false);
+  const [email, setEmail] = useState(
+    JSON.parse(localStorage.getItem("email")) || ""
+  );
+  const [trackers, setTrackers] = useState(
+    JSON.parse(localStorage.getItem(`${year}-${semester}-trackers`)) || {}
+  );
+
+  const handleChange = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const onSubmitForm = async (event) => {
+    event.preventDefault();
+    const resp = await fetch(
+      `https://schedge-alert-2.herokuapp.com/api/addCourse/${year}/${semester}/${section.registrationNumber}`,
+      {
+        crossDomain: true,
+        method: "put",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseName: section.name,
+          email: email,
+          status: section.status,
+        }),
+      }
+    );
+    localStorage.setItem("email", JSON.stringify(email));
+    if (!resp.ok) {
+      console.log(`Error ${resp.status}`);
+    }
+    setForm(false);
+  };
+
+  const handleOnTrack = async () => {
+    const { name, status, registrationNumber } = section;
+    if (email === "") {
+      setForm(true);
+      return;
+    }
+    const newTrackers = { ...trackers };
+    if (registrationNumber in newTrackers) {
+      newTrackers[registrationNumber] = !newTrackers[registrationNumber];
+    } else {
+      newTrackers[registrationNumber] = true;
+    }
+    if (newTrackers[registrationNumber]) {
+      const resp = await fetch(
+        `https://schedge-alert-2.herokuapp.com/api/addCourse/${year}/${semester}/${registrationNumber}`,
+        {
+          method: "put",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseName: name,
+            status: status,
+            email: email,
+          }),
+        }
+      );
+      if (!resp.ok) {
+        console.log(`Error ${resp.status}`);
+      }
+    } else {
+      const resp = await fetch(
+        `https://schedge-alert-2.herokuapp.com/api/removeCourse/${year}/${semester}/${registrationNumber}`,
+        {
+          method: "delete",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseName: name,
+            status: status,
+            email: email,
+          }),
+        }
+      );
+      if (!resp.ok) {
+        console.log(`Error ${resp.status}`);
+      }
+    }
+    localStorage.setItem(
+      `${year}-${semester}-trackers`,
+      JSON.stringify(newTrackers)
+    );
+    setTrackers(newTrackers);
+  };
 
   const handleExpandList = (event, registrationNumber) => {
     event.preventDefault();
@@ -132,7 +224,10 @@ function Section({
           </span>
         </WishlistButton>
         {section.status !== "Open" && (
-          <WishlistButton onClick={() => handleOnClick(section)}>
+          <TrackButton
+            hover={trackers[section.registrationNumber]}
+            onClick={() => handleOnTrack()}
+          >
             <AddBoxTwoTone
               style={{
                 color: grey[700],
@@ -143,9 +238,11 @@ function Section({
                 color: grey[700],
               }}
             >
-              Track status
+              {trackers[section.registrationNumber]
+                ? "Tracking On"
+                : "Track Status"}
             </span>
-          </WishlistButton>
+          </TrackButton>
         )}
       </UtilBar>
       <Collapse
@@ -175,6 +272,31 @@ function Section({
             );
           })}
       </Collapse>
+      <Dialog open={form} onClose={() => setForm(false)}>
+        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            To subscribe to this website, please enter your email address here.
+            We will send updates occasionally.
+          </DialogContentText>
+          <TextField
+            margin="dense"
+            id="name"
+            label="Email Address"
+            type="email"
+            fullWidth
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setForm(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={onSubmitForm} color="primary">
+            Subscribe
+          </Button>
+        </DialogActions>
+      </Dialog>
     </SectionContainer>
   );
 }
@@ -283,6 +405,29 @@ const WishlistButton = styled.div`
   justify-content: center;
   cursor: pointer;
   background-color: ${grey[200]};
+  margin-right: 2rem;
+  transition: 0.1s;
+
+  :hover {
+    background-color: ${grey[300]};
+  }
+
+  & > svg {
+    margin-right: 0.65rem;
+  }
+`;
+
+const TrackButton = styled.div`
+  font-size: 1.1rem;
+  height: 100%;
+  width: 12rem;
+  border-radius: 0.6rem;
+  padding: 0.8rem 0.5rem;
+  display: flex;
+  align-items: center;
+  background-color: ${(props) => (props.hover ? green[200] : grey[200])};
+  justify-content: center;
+  cursor: pointer;
   margin-right: 2rem;
   transition: 0.1s;
 
