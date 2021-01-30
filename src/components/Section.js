@@ -45,7 +45,7 @@ function Section({
 }) {
   const [expandedList, setExpandedList] = useState({});
   const [email, setEmail] = useState(
-    JSON.parse(localStorage.getItem("email")) || ""
+    JSON.parse(localStorage.getItem("email")) || "" //find a better way to store this for security
   );
   const [trackedCourses, setTrackedCourses] = useState(
     JSON.parse(localStorage.getItem(`${year}-${semester}-tracked-courses`)) ||
@@ -201,12 +201,48 @@ function Section({
             {changeStatus(section)}
           </span>
         </StatusContainer>
+        {section.status !== "Open" && (
+          <StatusButton onClick={handleOnTrack}>
+            {trackedCourses[section.registrationNumber] === undefined ||
+            !trackedCourses[section.registrationNumber] ? (
+              <NotificationsOffTwoToneIcon
+                style={{
+                  color: grey[700],
+                }}
+              />
+            ) : (
+              <NotificationsNoneTwoToneIcon
+                style={{
+                  color: `${
+                    trackedCourses[section.registrationNumber] === undefined ||
+                    !trackedCourses[section.registrationNumber]
+                      ? grey[700]
+                      : green[500]
+                  }`,
+                }}
+              />
+            )}
+            <span
+              style={{
+                color:
+                  trackedCourses[section.registrationNumber] === undefined ||
+                  !trackedCourses[section.registrationNumber]
+                    ? grey[700]
+                    : green[500],
+              }}
+            >
+              Track Course
+            </span>
+          </StatusButton>
+        )}
         <WishlistButton onClick={() => handleOnClick(section)}>
-          <AddBoxTwoTone
-            style={{
-              color: grey[700],
-            }}
-          />
+          {
+            <AddBoxTwoTone
+              style={{
+                color: grey[700],
+              }}
+            />
+          }
           <span
             style={{
               color: grey[700],
@@ -215,33 +251,6 @@ function Section({
             Add to Wishlist
           </span>
         </WishlistButton>
-        {section.status !== "Open" && (
-          <StatusButton
-            onClick={handleOnTrack}
-            colorOn={trackedCourses[section.registrationNumber]}
-          >
-            {trackedCourses[section.registrationNumber] ? (
-              <NotificationsNoneTwoToneIcon
-                style={{
-                  color: grey[700],
-                }}
-              />
-            ) : (
-              <NotificationsOffTwoToneIcon
-                style={{
-                  color: grey[700],
-                }}
-              />
-            )}
-            <span
-              style={{
-                color: grey[700],
-              }}
-            >
-              Track Course
-            </span>
-          </StatusButton>
-        )}
       </UtilBar>
       <Collapse
         in={expandedList[section.registrationNumber] ?? false}
@@ -425,12 +434,12 @@ const StatusButton = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background-color: ${(props) => (props.colorOn ? green[200] : grey[200])};
+  background-color: ${grey[200]};
   margin-right: 2rem;
   transition: 0.1s;
 
   :hover {
-    background-color: ${(props) => (props.colorOn ? green[300] : grey[300])};
+    background-color: ${grey[300]};
   }
 
   & > svg {
