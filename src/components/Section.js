@@ -45,7 +45,7 @@ function Section({
 }) {
   const [expandedList, setExpandedList] = useState({});
   const [email, setEmail] = useState(
-    JSON.parse(localStorage.getItem("email")) || "" //find a better way to store this for security
+    JSON.parse(sessionStorage.getItem("email")) || ""
   );
   const [trackedCourses, setTrackedCourses] = useState(
     JSON.parse(localStorage.getItem(`${year}-${semester}-tracked-courses`)) ||
@@ -77,7 +77,7 @@ function Section({
       `${year}-${semester}-tracked-courses`,
       JSON.stringify(newTrackedCourses)
     );
-    localStorage.setItem("email", JSON.stringify(email));
+    sessionStorage.setItem("email", JSON.stringify(email));
     setTrackedCourses(newTrackedCourses);
   };
 
